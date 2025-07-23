@@ -1,7 +1,5 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { nanoid } from 'nanoid';
-
 const app = express();
 const PORT = 3000;
 
@@ -11,7 +9,7 @@ type TaskStatus = 'To Do' | 'In Progress' | 'Done';
 type TaskPriority = 'Low' | 'Medium' | 'High';
 
 interface Task {
-	id: string;
+	id: number;
 	title: string;
 	description?: string;
 	category: TaskCategory;
@@ -27,7 +25,7 @@ app.use(express.json());
 // Данные в памяти
 let tasks: Task[] = [
 	{
-		id: '1',
+		id: 1,
 		title: 'Fix UI glitches',
 		description: 'Resolve layout shift issues on the dashboard when switching themes.',
 		category: 'Bug',
@@ -36,7 +34,7 @@ let tasks: Task[] = [
 		createdAt: '2025-07-15T09:00:00Z'
 	},
 	{
-		id: '2',
+		id: 2,
 		title: 'Add unit tests',
 		description: 'Cover edge cases for the authentication module.',
 		category: 'Feature',
@@ -45,7 +43,7 @@ let tasks: Task[] = [
 		createdAt: '2025-07-16T10:30:00Z'
 	},
 	{
-		id: '4',
+		id: 3,
 		title: 'Refactor auth middleware',
 		description: 'Improve code readability and separate concerns for easier testing.',
 		category: 'Refactor',
@@ -54,7 +52,7 @@ let tasks: Task[] = [
 		createdAt: '2025-07-12T08:20:00Z'
 	},
 	{
-		id: '5',
+		id: 4,
 		title: 'Fix login redirect bug',
 		description: 'Users are not redirected properly after logging in.',
 		category: 'Bug',
@@ -63,7 +61,7 @@ let tasks: Task[] = [
 		createdAt: '2025-07-17T11:10:00Z'
 	},
 	{
-		id: '7',
+		id: 5,
 		title: 'Document CLI usage',
 		description: 'Write user-facing documentation for the new CLI tool.',
 		category: 'Documentation',
@@ -72,6 +70,8 @@ let tasks: Task[] = [
 		createdAt: '2025-07-10T15:40:00Z'
 	}
 ];
+
+let lastId = 5;
 
 // Главная страница - информация о сервере
 app.get('/', (req: Request, res: Response) => {
@@ -108,7 +108,7 @@ app.get('/tasks', (req: Request, res: Response) => {
 // GET /tasks/:id - получить задачу по ID
 app.get('/tasks/:id', (req: Request, res: Response) => {
 	const { id } = req.params;
-	const task = tasks.find((t) => t.id === id);
+	const task = tasks.find((t) => t.id === +id);
 
 	if (!task) {
 		return res.status(404).json({ error: 'Задача не найдена' });
@@ -132,7 +132,7 @@ app.post('/tasks', (req: Request, res: Response) => {
 	}
 
 	const newTask: Task = {
-		id: nanoid(),
+		id: lastId++,
 		title: title.trim(),
 		description: description || '',
 		category,
@@ -150,7 +150,7 @@ app.patch('/tasks/:id', (req: Request, res: Response) => {
 	const { id } = req.params;
 	const updates: Partial<Task> = req.body;
 
-	const taskIndex = tasks.findIndex((t) => t.id === id);
+	const taskIndex = tasks.findIndex((t) => t.id === +id);
 
 	if (taskIndex === -1) {
 		return res.status(404).json({ error: 'Задача не найдена' });
@@ -169,7 +169,7 @@ app.patch('/tasks/:id', (req: Request, res: Response) => {
 // DELETE /tasks/:id - удалить задачу
 app.delete('/tasks/:id', (req: Request, res: Response) => {
 	const { id } = req.params;
-	const taskIndex = tasks.findIndex((t) => t.id === id);
+	const taskIndex = tasks.findIndex((t) => t.id === +id);
 
 	if (taskIndex === -1) {
 		return res.status(404).json({ error: 'Задача не найдена' });
